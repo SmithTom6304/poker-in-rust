@@ -1,6 +1,8 @@
 use std::fmt;
 
-#[derive(PartialEq, PartialOrd)]
+use strum_macros::EnumIter;
+
+#[derive(PartialEq, PartialOrd, EnumIter, Clone, Copy)]
 pub enum Suit {
     Club,
     Diamond,
