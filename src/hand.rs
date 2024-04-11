@@ -1,6 +1,6 @@
 use crate::card::Card;
 
-struct Hand {
+pub struct Hand {
     cards: [Card; 2],
 }
 
