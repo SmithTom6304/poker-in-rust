@@ -3,6 +3,10 @@ name = "poker-in-rust"
 version = "0.1.0"
 edition = "2021"
 
+[[bin]]
+name = "texas_hold_em"
+path = "src/games/texas_hold_em/bin/main.rs"
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
@@ -12,3 +16,8 @@ strum_macros = "0.26"
 
 [dev-dependencies]
 rstest = "0.18"
+
+[build-dependencies]
+anyhow = "1.0"
+fs_extra = "1.2"
+glob = "0.3"

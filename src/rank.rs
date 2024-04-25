@@ -2,7 +2,7 @@ use std::fmt;
 
 use strum_macros::EnumIter;
 
-#[derive(PartialEq, PartialOrd, EnumIter, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, EnumIter, Clone, Copy)]
 pub enum Rank {
     Two,
     Three,

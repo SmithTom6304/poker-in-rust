@@ -13,8 +13,8 @@ pub struct Deck {
 impl Deck {
     pub fn new() -> Self {
         let mut cards = vec![];
-        for suit in Suit::iter() {
-            for rank in Rank::iter() {
+        for rank in Rank::iter() {
+            for suit in Suit::iter() {
                 cards.push(Card::new(suit, rank));
             }
         }
