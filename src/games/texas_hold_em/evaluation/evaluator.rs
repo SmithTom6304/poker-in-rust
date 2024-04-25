@@ -1,3 +1,5 @@
+use std::path::Path;
+
 use crate::{card::Card, deck::Deck};
 
 use super::{database::DataBase, hand_rank::HandRank};
@@ -19,27 +21,22 @@ pub struct Evaluator {
     deck: Vec<CardCode>,
 }
 
-impl TryFrom<Vec<u8>> for Evaluator {
-    type Error = String;
-
-    fn try_from(value: Vec<u8>) -> Result<Self, Self::Error> {
-        let data = DataBase::try_from(value);
-        match data {
-            Err(err) => Err(err),
-            Ok(data) => {
-                let deck = Deck::new()
-                    .cards
-                    .iter()
-                    .map(|card| CardCode::from(card))
-                    .collect();
-
-                Ok(Evaluator { data, deck })
-            }
-        }
-    }
-}
-
 impl Evaluator {
+    pub fn create_from_path(path: &Path) -> Result<Self, String> {
+        let data = match DataBase::load_from_path(path) {
+            Ok(database) => database,
+            Err(err) => return Err(err),
+        };
+
+        let deck = Deck::new()
+            .cards
+            .iter()
+            .map(|card| CardCode::from(card))
+            .collect();
+
+        Ok(Evaluator { data, deck })
+    }
+
     pub fn evaluate_hand(&self, cards: &[Card; 7]) -> HandVal {
         let mut result = 53;
         let card_nums = cards.iter().map(|card| Evaluator::card_to_num(&self, card));
@@ -90,7 +87,7 @@ impl TryFrom<HandVal> for HandRank {
 
 #[cfg(test)]
 mod tests {
-    use std::fs;
+    use std::path::PathBuf;
 
     use crate::{rank::Rank, suit::Suit};
 
@@ -98,8 +95,8 @@ mod tests {
     use rstest::rstest;
 
     fn create_evaluator() -> Evaluator {
-        let rank_db = fs::read("res/HandRanks.dat").expect("Could not load hand ranks db");
-        Evaluator::try_from(rank_db).expect("Could not parse hand ranks db")
+        let path = PathBuf::from("two-plus-two-hand-evaluator/HandRanks.dat");
+        Evaluator::create_from_path(&path).expect("Could not parse hand ranks db")
     }
 
     #[rstest]

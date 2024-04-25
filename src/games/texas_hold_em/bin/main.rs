@@ -1,4 +1,4 @@
-use std::fs;
+use std::env;
 
 use poker_in_rust::{
     card::Card,
@@ -8,8 +8,9 @@ use poker_in_rust::{
 };
 
 fn main() {
-    let rank_db = fs::read("res/HandRanks.dat").expect("Could not load hand ranks db");
-    let rank_db = Evaluator::try_from(rank_db).expect("Could not parse hand ranks db");
+    let exe_path = env::current_exe().expect("Could not find current exe");
+    let path = exe_path.parent().unwrap().join("HandRanks.dat");
+    let rank_db = Evaluator::create_from_path(&path).expect("Could not parse hand ranks db");
 
     let pair = [
         Card::new(Suit::Spade, Rank::Nine),

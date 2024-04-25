@@ -1,9 +1,23 @@
+use std::{fs, path::Path};
+
 pub struct DataBase(pub Vec<u32>);
 
-impl TryFrom<Vec<u8>> for DataBase {
-    type Error = String;
+impl DataBase {
+    pub fn load_from_path(path: &Path) -> Result<Self, String> {
+        let data = match fs::read(path) {
+            Ok(data) => data,
+            Err(err) => return Err(format!("Error loading evaluator data file: {}", err)),
+        };
 
-    fn try_from(value: Vec<u8>) -> Result<Self, Self::Error> {
+        let data = match Self::format_data(data) {
+            Ok(data) => data,
+            Err(err) => return Err(format!("Error parsing evaluator data file: {}", err)),
+        };
+
+        Ok(DataBase(data))
+    }
+
+    fn format_data(value: Vec<u8>) -> Result<Vec<u32>, String> {
         let mut contents = vec![];
 
         let vec_length = value.len();
@@ -15,10 +29,10 @@ impl TryFrom<Vec<u8>> for DataBase {
             let bytes = &value[range].try_into();
             match bytes {
                 Ok(bytes) => contents.push(u32::from_le_bytes(*bytes)),
-                Err(err) => return Err(format!("Error creating evaluator lookup: {}", err)),
+                Err(err) => return Err(format!("Error parsing evaluator data: {}", err)),
             };
         }
 
-        Ok(DataBase(contents))
+        Ok(contents)
     }
 }
