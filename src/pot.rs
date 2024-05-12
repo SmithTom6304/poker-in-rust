@@ -37,7 +37,11 @@ impl Pot {
 #[cfg(test)]
 mod tests {
 
-    use crate::{deck::Deck, hand::Hand, player::Player};
+    use crate::{
+        deck::Deck,
+        hand::Hand,
+        player::{Player, PlayerId},
+    };
 
     use super::Pot;
 
@@ -46,7 +50,11 @@ mod tests {
             deck.draw().expect("Deck was empty"),
             deck.draw().expect("Deck was empty"),
         ]);
-        Player { hand, chips }
+        Player {
+            id: PlayerId(0),
+            hand,
+            chips,
+        }
     }
 
     #[test]

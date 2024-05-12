@@ -1,7 +1,8 @@
 use crate::card::Card;
 
+#[derive(Debug)]
 pub struct Hand {
-    cards: [Card; 2],
+    pub cards: [Card; 2],
 }
 
 impl Hand {
