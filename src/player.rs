@@ -15,14 +15,23 @@ impl Player {
     }
 
     pub fn bet(&mut self, amount: u32, pot: &mut Pot) -> Result<(), String> {
-        match amount > self.chips {
-            true => Err("Player does not have enough chips".to_string()),
-            false => {
-                self.chips -= amount;
-                pot.chips += amount;
-                Ok(())
-            }
+        if amount < pot.minimum_bet {
+            return Err(format!(
+                "Bet amount ({}) is less than minimum bet ({})",
+                amount, pot.minimum_bet
+            ));
         }
+
+        if self.chips < amount {
+            return Err(format!(
+                "Bet amount ({}) is greater than player chips ({})",
+                amount, self.chips
+            ));
+        }
+
+        self.chips -= amount;
+        pot.chips += amount;
+        Ok(())
     }
 }
 
@@ -53,7 +62,7 @@ mod tests {
     #[test]
     fn betting_reduces_chip_count() {
         let mut player = has_a_hand_and_chips();
-        let mut pot = Pot { chips: 0 };
+        let mut pot = Pot::empty();
         assert!(player.bet(20, &mut pot).is_ok());
         assert_eq!(80, player.chips);
         assert_eq!(20, pot.chips);
@@ -62,7 +71,17 @@ mod tests {
     #[test]
     fn cannot_bet_more_chips_than_player_has() {
         let mut player = has_a_hand_and_chips();
-        let mut pot = Pot { chips: 0 };
+        let mut pot = Pot::empty();
         assert!(player.bet(300, &mut pot).is_err());
+    }
+
+    #[test]
+    fn cannot_bet_less_than_minimum_pot_bet() {
+        let mut player = has_a_hand_and_chips();
+        let mut pot = Pot {
+            chips: 50,
+            minimum_bet: 10,
+        };
+        assert!(player.bet(5, &mut pot).is_err());
     }
 }

@@ -2,6 +2,7 @@ use crate::player::Player;
 
 pub struct Pot {
     pub chips: u32,
+    pub minimum_bet: u32,
 }
 
 impl Pot {
@@ -22,7 +23,14 @@ impl Pot {
             winners[i as usize].chips += 1;
         }
 
-        Pot { chips: 0 }
+        Self::empty()
+    }
+
+    pub fn empty() -> Self {
+        Pot {
+            chips: 0,
+            minimum_bet: 0,
+        }
     }
 }
 
@@ -52,7 +60,10 @@ mod tests {
             create_test_player(&mut deck, player_chips),
         ];
 
-        let pot = Pot { chips: pot_chips };
+        let pot = Pot {
+            chips: pot_chips,
+            minimum_bet: 0,
+        };
         let emptied_pot = pot.deal_winnings(players.iter_mut().collect());
 
         let pot_chips_per_player = pot_chips / players.len() as u32;
@@ -74,7 +85,10 @@ mod tests {
             create_test_player(&mut deck, player_chips),
         ];
 
-        let pot = Pot { chips: pot_chips };
+        let pot = Pot {
+            chips: pot_chips,
+            minimum_bet: 0,
+        };
         _ = pot.deal_winnings(players.iter_mut().collect());
 
         // 5 into 3 does not go.. so divide based on player order
