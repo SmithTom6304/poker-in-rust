@@ -13,6 +13,7 @@ path = "src/games/texas_hold_em/bin/main.rs"
 rand = "0.8"
 strum = "0.26"
 strum_macros = "0.26"
+anyhow = "1.0"
 
 [dev-dependencies]
 rstest = "0.18"

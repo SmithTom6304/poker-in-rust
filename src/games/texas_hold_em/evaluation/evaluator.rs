@@ -4,6 +4,8 @@ use crate::{card::Card, deck::Deck};
 
 use super::{database::DataBase, hand_rank::HandRank};
 
+use anyhow::Result;
+
 const PRIMES: [u32; 13] = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41];
 
 const SUIT_BITS: [u32; 4] = [8, 4, 2, 1];
@@ -22,11 +24,8 @@ pub struct Evaluator {
 }
 
 impl Evaluator {
-    pub fn create_from_path(path: &Path) -> Result<Self, String> {
-        let data = match DataBase::load_from_path(path) {
-            Ok(database) => database,
-            Err(err) => return Err(err),
-        };
+    pub fn create_from_path(path: &Path) -> Result<Self> {
+        let data = DataBase::load_from_path(path)?;
 
         let deck = Deck::new()
             .cards

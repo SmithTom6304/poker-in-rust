@@ -1,23 +1,17 @@
+use anyhow::Result;
 use std::{fs, path::Path};
 
 pub struct DataBase(pub Vec<u32>);
 
 impl DataBase {
-    pub fn load_from_path(path: &Path) -> Result<Self, String> {
-        let data = match fs::read(path) {
-            Ok(data) => data,
-            Err(err) => return Err(format!("Error loading evaluator data file: {}", err)),
-        };
-
-        let data = match Self::format_data(data) {
-            Ok(data) => data,
-            Err(err) => return Err(format!("Error parsing evaluator data file: {}", err)),
-        };
+    pub fn load_from_path(path: &Path) -> Result<Self> {
+        let data = fs::read(path)?;
+        let data = Self::format_data(data)?;
 
         Ok(DataBase(data))
     }
 
-    fn format_data(value: Vec<u8>) -> Result<Vec<u32>, String> {
+    fn format_data(value: Vec<u8>) -> Result<Vec<u32>> {
         let mut contents = vec![];
 
         let vec_length = value.len();
@@ -26,11 +20,8 @@ impl DataBase {
             if range.end > vec_length {
                 continue;
             }
-            let bytes = &value[range].try_into();
-            match bytes {
-                Ok(bytes) => contents.push(u32::from_le_bytes(*bytes)),
-                Err(err) => return Err(format!("Error parsing evaluator data: {}", err)),
-            };
+            let bytes = &value[range].try_into()?;
+            contents.push(u32::from_le_bytes(*bytes));
         }
 
         Ok(contents)
