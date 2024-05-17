@@ -27,18 +27,14 @@ impl Evaluator {
     pub fn create_from_path(path: &Path) -> Result<Self> {
         let data = DataBase::load_from_path(path)?;
 
-        let deck = Deck::new()
-            .cards
-            .iter()
-            .map(|card| CardCode::from(card))
-            .collect();
+        let deck = Deck::new().cards.iter().map(CardCode::from).collect();
 
         Ok(Evaluator { data, deck })
     }
 
     pub fn evaluate_hand(&self, cards: &[Card; 7]) -> HandVal {
         let mut result = 53;
-        let card_nums = cards.iter().map(|card| Evaluator::card_to_num(&self, card));
+        let card_nums = cards.iter().map(|card| Evaluator::card_to_num(self, card));
         for num in card_nums {
             result = self.data.0[(result + num.0) as usize];
         }
@@ -141,11 +137,9 @@ mod tests {
         let cnums = cards.iter().map(|card| evaluator.card_to_num(card));
 
         let mut result = 53;
-        let mut i = 0;
-        for cnum in cnums {
+        for (i, cnum) in cnums.enumerate() {
             result = evaluator.data.0[(result + cnum.0) as usize];
             assert_eq!(result, expected_values[i]);
-            i += 1;
         }
     }
 

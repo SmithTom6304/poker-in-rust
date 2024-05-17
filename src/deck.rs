@@ -10,6 +10,12 @@ pub struct Deck {
     pub cards: Vec<Card>,
 }
 
+impl Default for Deck {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Deck {
     pub fn new() -> Self {
         let mut cards = vec![];
@@ -22,7 +28,7 @@ impl Deck {
     }
 
     pub fn shuffle(self) -> Self {
-        let mut cards = Vec::from(self.cards);
+        let mut cards = self.cards;
         cards.shuffle(&mut thread_rng());
         Deck { cards }
     }

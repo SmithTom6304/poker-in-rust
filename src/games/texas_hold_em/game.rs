@@ -167,7 +167,7 @@ impl Game {
                     .collect::<Vec<String>>()
                     .join(", ")
             );
-            let player_move = Self::determine_move(&game);
+            let player_move = Self::determine_move(game);
             game.handle_move(player_move);
 
             if game.current_player_index == game.button_index {
@@ -206,7 +206,7 @@ impl Game {
                 .collect::<Vec<String>>()
                 .join(", ")
         );
-        if cards.len() > 0 {
+        if !cards.is_empty() {
             println!(
                 "Cards - {}",
                 cards
@@ -219,7 +219,7 @@ impl Game {
     }
 
     fn determine_move(&self) -> Move {
-        let player_move = ConsolePlayer::determine_move(&self);
+        let player_move = ConsolePlayer::determine_move(self);
         println!(
             "Player {:?} chose {:?}",
             self.players[self.current_player_index].id, player_move
