@@ -22,10 +22,15 @@ pub struct Game {
     pub button_index: usize,
     pub current_player_index: usize,
     pub pot: Pot,
-    pub flop: Option<[Card; 3]>,
-    pub turn: Option<Card>,
-    pub river: Option<Card>,
+    stage: Stage,
     evaluator: Evaluator,
+}
+
+pub enum Stage {
+    PreFlop,
+    Flop { cards: [Card; 3] },
+    Turn { cards: [Card; 4] },
+    River { cards: [Card; 5] },
 }
 
 impl Game {
@@ -52,9 +57,7 @@ impl Game {
             button_index: button as usize,
             current_player_index: current_player,
             pot,
-            flop: None,
-            turn: None,
-            river: None,
+            stage: Stage::PreFlop,
             evaluator,
         }
     }
@@ -69,7 +72,7 @@ impl Game {
                 break;
             }
 
-            Self::print_pre_round_status(&game);
+            Self::print_pre_stage_status(&game);
             Self::do_stage(&mut game);
             game.pot.minimum_bet = 0;
 
@@ -78,63 +81,23 @@ impl Game {
                 continue;
             }
 
-            if game.flop.is_none() {
-                game.flop = Some([
-                    game.deck.draw().unwrap(),
-                    game.deck.draw().unwrap(),
-                    game.deck.draw().unwrap(),
-                ]);
-                continue;
-            }
-
-            if game.turn.is_none() {
-                game.turn = Some(game.deck.draw().unwrap());
-                continue;
-            }
-
-            if game.river.is_none() {
-                game.river = Some(game.deck.draw().unwrap());
-                continue;
-            }
-
-            game_finished = true;
-        }
-
-        if game.players.len() == 1 {
-            game.pot = game.pot.deal_winnings(game.players.iter_mut().collect());
-        } else {
-            let mut cards = vec![];
-            cards.append(&mut game.flop.unwrap().to_vec());
-            cards.push(game.turn.unwrap());
-            cards.push(game.river.unwrap());
-            let mut player_score = HashMap::<PlayerId, HandVal>::new();
-            for player in game.players.iter() {
-                let mut cards = cards.clone();
-                cards.append(&mut player.hand.cards.to_vec());
-                let score = game.evaluator.evaluate_hand(&cards.try_into().unwrap());
-                player_score.insert(player.id, score);
-            }
-
-            let winner_score = player_score.values().max().unwrap();
-            let winners = player_score
-                .iter()
-                .filter(|pair| pair.1 == winner_score)
-                .map(|pair| pair.0)
-                .collect::<Vec<&PlayerId>>();
-            let winners = game
-                .players
-                .iter_mut()
-                .filter(|player| winners.contains(&&player.id))
-                .collect::<Vec<&mut Player>>();
-            println!(
-                "Winners: {}",
-                winners
-                    .iter()
-                    .map(|player| format!("{}", player.id))
-                    .collect::<Vec<String>>()
-                    .join(", ")
-            );
-            game.pot.deal_winnings(winners);
+            let stage = match game.stage {
+                Stage::PreFlop => Stage::Flop {
+                    cards: Self::draw_flop(&mut game.deck),
+                },
+                Stage::Flop { cards } => Stage::Turn {
+                    cards: Self::draw_turn(&mut game.deck, cards),
+                },
+                Stage::Turn { cards } => Stage::River {
+                    cards: Self::draw_river(&mut game.deck, cards),
+                },
+                Stage::River { cards: _ } => {
+                    Self::finish_round(&mut game);
+                    game_finished = true;
+                    continue;
+                }
+            };
+            game.stage = stage;
         }
 
         println!("Game done!");
@@ -189,23 +152,74 @@ impl Game {
         }
     }
 
-    fn print_pre_round_status(&self) {
-        let mut turn_string = "Pre-flop";
-        let mut cards = vec![];
-        if let Some(flop) = self.flop {
-            cards.append(&mut flop.to_vec());
-            turn_string = "Flop";
+    fn finish_round(game: &mut Game) {
+        if game.players.len() == 1 {
+            let players = game.players.iter_mut().collect();
+            game.pot.deal_winnings(players);
+        } else {
+            let cards = match game.stage {
+                Stage::River { cards } => cards,
+                _ => panic!("Incorrect game stage"),
+            };
+
+            let mut player_score = HashMap::<PlayerId, HandVal>::new();
+            for player in game.players.iter() {
+                let cards = cards;
+                let cards = [
+                    cards[0],
+                    cards[1],
+                    cards[2],
+                    cards[3],
+                    cards[4],
+                    player.hand.cards[0],
+                    player.hand.cards[1],
+                ];
+
+                let score = game.evaluator.evaluate_hand(&cards);
+                player_score.insert(player.id, score);
+            }
+
+            let winner_score = player_score.values().max().unwrap();
+            let winners = player_score
+                .iter()
+                .filter(|pair| pair.1 == winner_score)
+                .map(|pair| pair.0)
+                .collect::<Vec<&PlayerId>>();
+            let winners = game
+                .players
+                .iter_mut()
+                .filter(|player| winners.contains(&&player.id))
+                .collect::<Vec<&mut Player>>();
+            println!(
+                "Winners: {}",
+                winners
+                    .iter()
+                    .map(|player| format!("{}", player.id))
+                    .collect::<Vec<String>>()
+                    .join(", ")
+            );
+            game.pot.deal_winnings(winners);
         }
-        if let Some(turn) = self.turn {
-            cards.push(turn);
-            turn_string = "Turn";
-        }
-        if let Some(river) = self.river {
-            cards.push(river);
-            turn_string = "River";
+    }
+
+    fn print_pre_stage_status(&self) {
+        let mut cards_vec = vec![];
+        match self.stage {
+            Stage::PreFlop => println!("Pre-Flop"),
+            Stage::Flop { cards } => {
+                println!("Flop");
+                cards_vec.append(&mut cards.to_vec());
+            }
+            Stage::Turn { cards } => {
+                println!("Turn");
+                cards_vec.append(&mut cards.to_vec());
+            }
+            Stage::River { cards } => {
+                println!("River");
+                cards_vec.append(&mut cards.to_vec());
+            }
         }
 
-        println!("Turn - {}", turn_string);
         println!(
             "Remaining players - {}",
             self.players
@@ -214,16 +228,32 @@ impl Game {
                 .collect::<Vec<String>>()
                 .join(", ")
         );
-        if !cards.is_empty() {
+        if !cards_vec.is_empty() {
             println!(
                 "Cards - {}",
-                cards
+                cards_vec
                     .iter()
                     .map(|card| format!("{}", card))
                     .collect::<Vec<String>>()
                     .join(", ")
             );
         }
+    }
+
+    fn draw_flop(deck: &mut Deck) -> [Card; 3] {
+        [
+            deck.draw().unwrap(),
+            deck.draw().unwrap(),
+            deck.draw().unwrap(),
+        ]
+    }
+
+    fn draw_turn(deck: &mut Deck, flop: [Card; 3]) -> [Card; 4] {
+        [flop[0], flop[1], flop[2], deck.draw().unwrap()]
+    }
+
+    fn draw_river(deck: &mut Deck, turn: [Card; 4]) -> [Card; 5] {
+        [turn[0], turn[1], turn[2], turn[3], deck.draw().unwrap()]
     }
 
     fn determine_move(&self) -> Move {

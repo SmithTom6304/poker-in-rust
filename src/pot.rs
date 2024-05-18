@@ -9,9 +9,7 @@ impl Pot {
     /// Distributes pot winnings to a list of players.
     ///
     /// Players should be ordered by distance to dealer to account for splitting of uneven chip counts.
-    ///
-    /// Returns an empty pot.
-    pub fn deal_winnings(self, mut winners: Vec<&mut Player>) -> Pot {
+    pub fn deal_winnings(&mut self, mut winners: Vec<&mut Player>) {
         let division = self.chips / winners.len() as u32;
         winners
             .iter_mut()
@@ -23,7 +21,8 @@ impl Pot {
             winners[i as usize].chips += 1;
         }
 
-        Self::empty()
+        self.chips = 0;
+        self.minimum_bet = 0;
     }
 
     pub fn empty() -> Self {
@@ -68,17 +67,17 @@ mod tests {
             create_test_player(&mut deck, player_chips),
         ];
 
-        let pot = Pot {
+        let mut pot = Pot {
             chips: pot_chips,
             minimum_bet: 0,
         };
-        let emptied_pot = pot.deal_winnings(players.iter_mut().collect());
+        pot.deal_winnings(players.iter_mut().collect());
 
         let pot_chips_per_player = pot_chips / players.len() as u32;
         assert!(players
             .iter()
             .all(|player| player_chips + pot_chips_per_player == player.chips));
-        assert_eq!(0, emptied_pot.chips);
+        assert_eq!(0, pot.chips);
     }
 
     #[test]
@@ -93,11 +92,11 @@ mod tests {
             create_test_player(&mut deck, player_chips),
         ];
 
-        let pot = Pot {
+        let mut pot = Pot {
             chips: pot_chips,
             minimum_bet: 0,
         };
-        _ = pot.deal_winnings(players.iter_mut().collect());
+        pot.deal_winnings(players.iter_mut().collect());
 
         // 5 into 3 does not go.. so divide based on player order
         assert_eq!(7, players[0].chips);
