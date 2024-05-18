@@ -8,5 +8,5 @@ fn main() {
     let evaluator = Evaluator::create_from_path(&path).expect("Could not parse hand ranks db");
 
     let game = Game::new(3, evaluator);
-    game.run()
+    game.do_round()
 }

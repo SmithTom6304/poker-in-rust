@@ -59,7 +59,7 @@ impl Game {
         }
     }
 
-    pub fn run(self) {
+    pub fn do_round(self) {
         let mut game = self;
         let mut game_finished = false;
         game.pot.minimum_bet = 10;
@@ -70,7 +70,7 @@ impl Game {
             }
 
             Self::print_pre_round_status(&game);
-            Self::do_round(&mut game);
+            Self::do_stage(&mut game);
             game.pot.minimum_bet = 0;
 
             if game.players.len() == 1 {
@@ -146,7 +146,7 @@ impl Game {
         }
     }
 
-    fn do_round(game: &mut Game) {
+    pub fn do_stage(game: &mut Game) {
         loop {
             if game.players.len() == 1 {
                 break;
@@ -168,7 +168,7 @@ impl Game {
                     .join(", ")
             );
             let player_move = Self::determine_move(game);
-            game.handle_move(player_move);
+            game.do_move(player_move);
 
             if game.current_player_index == game.button_index {
                 game.advance_player();
@@ -178,6 +178,14 @@ impl Game {
             game.advance_player();
 
             println!("Pot: {}, min bet: {}", game.pot.chips, game.pot.minimum_bet);
+        }
+    }
+
+    pub fn do_move(&mut self, player_move: Move) {
+        match player_move {
+            Move::Fold => self.handle_fold(),
+            Move::Call => self.handle_call(),
+            Move::Raise { amount } => self.handle_raise(amount),
         }
     }
 
@@ -226,14 +234,6 @@ impl Game {
         );
 
         player_move
-    }
-
-    fn handle_move(&mut self, player_move: Move) {
-        match player_move {
-            Move::Fold => self.handle_fold(),
-            Move::Call => self.handle_call(),
-            Move::Raise { amount } => self.handle_raise(amount),
-        }
     }
 
     fn handle_fold(&mut self) {
