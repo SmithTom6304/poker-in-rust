@@ -149,6 +149,41 @@ impl Game {
             Move::Call => self.handle_call(),
             Move::Raise { amount } => self.handle_raise(amount),
         }
+        self.advance_player_from_move(player_move)
+    }
+
+    fn advance_player_from_move(&mut self, player_move: Move) {
+        let next_round = self.current_player_index == self.button_index;
+
+        match player_move {
+            Move::Fold => {
+                if self.current_player_index <= self.button_index {
+                    self.button_index = match self.button_index {
+                        0 => self.players.len() - 1,
+                        _ => self.button_index - 1,
+                    }
+                }
+
+                if self.current_player_index >= self.players.len() {
+                    self.current_player_index = 0
+                }
+
+                if next_round {
+                    // TODO Do next round
+                }
+            }
+            Move::Call => {
+                self.current_player_index = (self.current_player_index + 1) % self.players.len()
+            }
+            Move::Raise { amount } => {
+                self.handle_raise(amount);
+                self.button_index = match self.current_player_index {
+                    0 => self.players.len() - 1,
+                    _ => self.current_player_index - 1,
+                };
+                self.current_player_index = (self.current_player_index + 1) % self.players.len()
+            }
+        }
     }
 
     fn finish_round(game: &mut Game) {
@@ -269,17 +304,6 @@ impl Game {
         let current_player = self.players.remove(self.current_player_index);
         let folded_player = current_player.fold();
         self.folded_players.push(folded_player);
-
-        if self.current_player_index == 0 {
-            self.current_player_index = self.players.len() - 1;
-        } else {
-            self.current_player_index -= 1;
-        }
-        if self.button_index == 0 {
-            self.button_index = self.players.len() - 1;
-        } else {
-            self.button_index -= 1;
-        }
     }
 
     fn handle_call(&mut self) {
@@ -302,11 +326,6 @@ impl Game {
                 self.handle_fold();
             }
         }
-
-        self.button_index = match self.current_player_index {
-            0 => self.players.len() - 1,
-            _ => self.current_player_index - 1,
-        };
     }
 
     fn advance_player(&mut self) {
