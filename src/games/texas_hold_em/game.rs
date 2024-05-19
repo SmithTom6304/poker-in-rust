@@ -1,3 +1,4 @@
+use core::fmt;
 use std::collections::HashMap;
 
 use crate::{
@@ -21,15 +22,53 @@ pub struct Game {
     pub button_index: usize,
     pub current_player_index: usize,
     pub pot: Pot,
-    stage: Stage,
+    pub stage: Stage,
     evaluator: Box<dyn Evaluator>,
 }
 
+#[derive(Debug)]
 pub enum Stage {
     PreFlop,
     Flop { cards: [Card; 3] },
     Turn { cards: [Card; 4] },
     River { cards: [Card; 5] },
+}
+
+impl fmt::Display for Stage {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut cards_vec = vec![];
+        match self {
+            Stage::PreFlop => {
+                write!(f, "Pre-Flop")?;
+            }
+            Stage::Flop { cards } => {
+                write!(f, "Flop")?;
+                cards_vec.append(&mut cards.to_vec());
+            }
+            Stage::Turn { cards } => {
+                write!(f, "Turn")?;
+                cards_vec.append(&mut cards.to_vec());
+            }
+            Stage::River { cards } => {
+                write!(f, "River")?;
+                cards_vec.append(&mut cards.to_vec());
+            }
+        }
+
+        if !cards_vec.is_empty() {
+            write!(
+                f,
+                "Cards - {}",
+                cards_vec
+                    .iter()
+                    .map(|card| format!("{}", card))
+                    .collect::<Vec<String>>()
+                    .join(", ")
+            )?;
+        }
+
+        Ok(())
+    }
 }
 
 impl Game {
@@ -237,23 +276,7 @@ impl Game {
     }
 
     fn print_pre_stage_status(&self) {
-        let mut cards_vec = vec![];
-        match self.stage {
-            Stage::PreFlop => println!("Pre-Flop"),
-            Stage::Flop { cards } => {
-                println!("Flop");
-                cards_vec.append(&mut cards.to_vec());
-            }
-            Stage::Turn { cards } => {
-                println!("Turn");
-                cards_vec.append(&mut cards.to_vec());
-            }
-            Stage::River { cards } => {
-                println!("River");
-                cards_vec.append(&mut cards.to_vec());
-            }
-        }
-
+        println!("{}", self.stage);
         println!(
             "Remaining players - {}",
             self.players
@@ -262,16 +285,6 @@ impl Game {
                 .collect::<Vec<String>>()
                 .join(", ")
         );
-        if !cards_vec.is_empty() {
-            println!(
-                "Cards - {}",
-                cards_vec
-                    .iter()
-                    .map(|card| format!("{}", card))
-                    .collect::<Vec<String>>()
-                    .join(", ")
-            );
-        }
     }
 
     fn draw_flop(deck: &mut Deck) -> [Card; 3] {
