@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use crate::{
     card::Card,
     deck::Deck,
-    games::texas_hold_em::evaluation::evaluator::HandVal,
+    games::texas_hold_em::evaluation::evaluator::{Evaluator, HandVal},
     hand::Hand,
     player::{FoldedPlayer, Player, PlayerId},
     pot::Pot,
@@ -11,7 +11,6 @@ use crate::{
 
 use super::{
     console_player::ConsolePlayer,
-    evaluation::evaluator::Evaluator,
     player_driver::{Move, PlayerDriver},
 };
 
@@ -23,7 +22,7 @@ pub struct Game {
     pub current_player_index: usize,
     pub pot: Pot,
     stage: Stage,
-    evaluator: Evaluator,
+    evaluator: Box<dyn Evaluator>,
 }
 
 pub enum Stage {
@@ -34,7 +33,7 @@ pub enum Stage {
 }
 
 impl Game {
-    pub fn new(num_players: u8, evaluator: Evaluator) -> Self {
+    pub fn new(num_players: u8, evaluator: Box<dyn Evaluator>) -> Self {
         let mut deck = Deck::new().shuffle();
         let button = num_players - 1;
         let current_player = 0;
