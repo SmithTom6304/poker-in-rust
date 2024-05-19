@@ -124,3 +124,101 @@ fn raising_moves_button_index_correctly(
 
     assert_eq!(expected_new_button, game.button_index)
 }
+
+#[rstest]
+#[case(0, 0, true)]
+#[case(0, 1, false)]
+#[case(0, 2, false)]
+#[case(1, 0, false)]
+#[case(1, 1, true)]
+#[case(1, 2, false)]
+#[case(2, 0, false)]
+#[case(2, 1, false)]
+#[case(2, 2, true)]
+fn folding_moves_to_next_stage_correctly(
+    #[case] player_to_fold: usize,
+    #[case] current_button: usize,
+    #[case] should_move_stage: bool,
+) {
+    use super::game::Stage;
+
+    let mut game = Game::new(3, Box::new(DummyEvaluator {}));
+    game.current_player_index = player_to_fold;
+    game.button_index = current_button;
+
+    game.do_move(Move::Fold);
+
+    match should_move_stage {
+        true => match game.stage {
+            Stage::Flop { cards: _ } => (),
+            stage => panic!("Expected stage flop, found {}", stage),
+        },
+        false => match game.stage {
+            Stage::PreFlop => (),
+            stage => panic!("Expected stage PreFlop, found {}", stage),
+        },
+    }
+}
+
+#[rstest]
+#[case(0, 0, true)]
+#[case(0, 1, false)]
+#[case(0, 2, false)]
+#[case(1, 0, false)]
+#[case(1, 1, true)]
+#[case(1, 2, false)]
+#[case(2, 0, false)]
+#[case(2, 1, false)]
+#[case(2, 2, true)]
+fn calling_moves_to_next_stage_correctly(
+    #[case] player_to_call: usize,
+    #[case] current_button: usize,
+    #[case] should_move_stage: bool,
+) {
+    use super::game::Stage;
+
+    let mut game = Game::new(3, Box::new(DummyEvaluator {}));
+    game.current_player_index = player_to_call;
+    game.button_index = current_button;
+
+    game.do_move(Move::Call);
+
+    match should_move_stage {
+        true => match game.stage {
+            Stage::Flop { cards: _ } => (),
+            stage => panic!("Expected stage flop, found {}", stage),
+        },
+        false => match game.stage {
+            Stage::PreFlop => (),
+            stage => panic!("Expected stage PreFlop, found {}", stage),
+        },
+    }
+}
+
+#[rstest]
+#[case(0, 0)]
+#[case(0, 1)]
+#[case(0, 2)]
+#[case(1, 0)]
+#[case(1, 1)]
+#[case(1, 2)]
+#[case(2, 0)]
+#[case(2, 1)]
+#[case(2, 2)]
+fn raising_doesnt_move_to_next_stage(
+    #[case] player_to_raise: usize,
+    #[case] current_button: usize,
+) {
+    use super::game::Stage;
+
+    let mut game = Game::new(3, Box::new(DummyEvaluator {}));
+    game.current_player_index = player_to_raise;
+    game.button_index = current_button;
+
+    game.do_move(Move::Raise { amount: 10 });
+
+    match game.stage {
+        Stage::PreFlop => (),
+        stage => panic!("Expected stage PreFlop, found {}", stage),
+    };
+}

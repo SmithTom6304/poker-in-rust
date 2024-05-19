@@ -26,12 +26,13 @@ pub struct Game {
     evaluator: Box<dyn Evaluator>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Stage {
     PreFlop,
     Flop { cards: [Card; 3] },
     Turn { cards: [Card; 4] },
     River { cards: [Card; 5] },
+    Finished,
 }
 
 impl fmt::Display for Stage {
@@ -52,6 +53,9 @@ impl fmt::Display for Stage {
             Stage::River { cards } => {
                 write!(f, "River")?;
                 cards_vec.append(&mut cards.to_vec());
+            }
+            Stage::Finished => {
+                write!(f, "Finished")?;
             }
         }
 
@@ -102,40 +106,16 @@ impl Game {
 
     pub fn do_round(self) {
         let mut game = self;
-        let mut game_finished = false;
         game.pot.minimum_bet = 10;
 
         loop {
-            if game_finished {
-                break;
-            }
-
             Self::print_pre_stage_status(&game);
             Self::do_stage(&mut game);
             game.pot.minimum_bet = 0;
 
-            if game.players.len() == 1 {
-                game_finished = true;
-                continue;
+            if game.stage == Stage::Finished {
+                break;
             }
-
-            let stage = match game.stage {
-                Stage::PreFlop => Stage::Flop {
-                    cards: Self::draw_flop(&mut game.deck),
-                },
-                Stage::Flop { cards } => Stage::Turn {
-                    cards: Self::draw_turn(&mut game.deck, cards),
-                },
-                Stage::Turn { cards } => Stage::River {
-                    cards: Self::draw_river(&mut game.deck, cards),
-                },
-                Stage::River { cards: _ } => {
-                    Self::finish_round(&mut game);
-                    game_finished = true;
-                    continue;
-                }
-            };
-            game.stage = stage;
         }
 
         println!("Game done!");
@@ -149,10 +129,7 @@ impl Game {
 
     pub fn do_stage(game: &mut Game) {
         loop {
-            if game.players.len() == 1 {
-                break;
-            }
-
+            let stage = game.stage;
             println!(
                 "Player {:?}'s turn",
                 game.players[game.current_player_index].id
@@ -171,29 +148,42 @@ impl Game {
             let player_move = Self::determine_move(game);
             game.do_move(player_move);
 
-            if game.current_player_index == game.button_index {
-                game.advance_player();
+            println!("Pot: {}, min bet: {}", game.pot.chips, game.pot.minimum_bet);
+
+            if stage != game.stage {
                 break;
             }
-
-            game.advance_player();
-
-            println!("Pot: {}, min bet: {}", game.pot.chips, game.pot.minimum_bet);
         }
     }
 
     pub fn do_move(&mut self, player_move: Move) {
+        let mut advance_stage = false;
         match player_move {
-            Move::Fold => self.handle_fold(),
-            Move::Call => self.handle_call(),
+            Move::Fold => {
+                self.handle_fold();
+                advance_stage = self.current_player_index == self.button_index;
+            }
+            Move::Call => {
+                self.handle_call();
+                advance_stage = self.current_player_index == self.button_index;
+            }
             Move::Raise { amount } => self.handle_raise(amount),
         }
-        self.advance_player_from_move(player_move)
+
+        if self.players.len() == 1 {
+            self.finish_round();
+            self.stage = Stage::Finished;
+            return;
+        }
+
+        self.advance_player(player_move);
+
+        if advance_stage {
+            self.advance_stage()
+        }
     }
 
-    fn advance_player_from_move(&mut self, player_move: Move) {
-        let next_round = self.current_player_index == self.button_index;
-
+    fn advance_player(&mut self, player_move: Move) {
         match player_move {
             Move::Fold => {
                 if self.current_player_index <= self.button_index {
@@ -205,10 +195,6 @@ impl Game {
 
                 if self.current_player_index >= self.players.len() {
                     self.current_player_index = 0
-                }
-
-                if next_round {
-                    // TODO Do next round
                 }
             }
             Move::Call => {
@@ -225,18 +211,40 @@ impl Game {
         }
     }
 
-    fn finish_round(game: &mut Game) {
-        if game.players.len() == 1 {
-            let players = game.players.iter_mut().collect();
-            game.pot.deal_winnings(players);
+    fn advance_stage(&mut self) {
+        self.stage = match self.stage {
+            Stage::PreFlop => Stage::Flop {
+                cards: Self::draw_flop(&mut self.deck),
+            },
+            Stage::Flop { cards } => Stage::Turn {
+                cards: Self::draw_turn(&mut self.deck, cards),
+            },
+            Stage::Turn { cards } => Stage::River {
+                cards: Self::draw_river(&mut self.deck, cards),
+            },
+            Stage::River { cards: _ } => {
+                self.finish_round();
+                Stage::Finished
+            }
+            Stage::Finished => {
+                //Error?
+                return;
+            }
+        };
+    }
+
+    fn finish_round(&mut self) {
+        if self.players.len() == 1 {
+            let players = self.players.iter_mut().collect();
+            self.pot.deal_winnings(players);
         } else {
-            let cards = match game.stage {
+            let cards = match self.stage {
                 Stage::River { cards } => cards,
                 _ => panic!("Incorrect game stage"),
             };
 
             let mut player_score = HashMap::<PlayerId, HandVal>::new();
-            for player in game.players.iter() {
+            for player in self.players.iter() {
                 let cards = cards;
                 let cards = [
                     cards[0],
@@ -248,7 +256,7 @@ impl Game {
                     player.hand.cards[1],
                 ];
 
-                let score = game.evaluator.evaluate_hand(&cards);
+                let score = self.evaluator.evaluate_hand(&cards);
                 player_score.insert(player.id, score);
             }
 
@@ -258,7 +266,7 @@ impl Game {
                 .filter(|pair| pair.1 == winner_score)
                 .map(|pair| pair.0)
                 .collect::<Vec<&PlayerId>>();
-            let winners = game
+            let winners = self
                 .players
                 .iter_mut()
                 .filter(|player| winners.contains(&&player.id))
@@ -271,7 +279,7 @@ impl Game {
                     .collect::<Vec<String>>()
                     .join(", ")
             );
-            game.pot.deal_winnings(winners);
+            self.pot.deal_winnings(winners);
         }
     }
 
@@ -339,9 +347,5 @@ impl Game {
                 self.handle_fold();
             }
         }
-    }
-
-    fn advance_player(&mut self) {
-        self.current_player_index = (self.current_player_index + 1) % self.players.len();
     }
 }
