@@ -6,7 +6,7 @@ use crate::{
     deck::Deck,
     games::texas_hold_em::evaluation::evaluator::{Evaluator, HandVal},
     hand::Hand,
-    player::{FoldedPlayer, Player, PlayerId},
+    player::{Active, Folded, Player, PlayerId},
     pot::Pot,
 };
 
@@ -16,8 +16,8 @@ use super::{
 };
 
 pub struct Game {
-    pub players: Vec<Player>,
-    pub folded_players: Vec<FoldedPlayer>,
+    pub players: Vec<Player<Active>>,
+    pub folded_players: Vec<Player<Folded>>,
     pub deck: Deck,
     pub button_index: usize,
     pub current_player_index: usize,
@@ -84,11 +84,11 @@ impl Game {
         let mut players = vec![];
         let mut i = 1;
         while i <= num_players {
-            players.push(Player {
-                id: PlayerId(i),
-                hand: Hand::new([deck.draw().unwrap(), deck.draw().unwrap()]),
-                chips: 100,
-            });
+            players.push(Player::<Active>::new(
+                PlayerId(i),
+                Hand::new([deck.draw().unwrap(), deck.draw().unwrap()]),
+                100,
+            ));
             i += 1;
         }
 
@@ -270,7 +270,7 @@ impl Game {
                 .players
                 .iter_mut()
                 .filter(|player| winners.contains(&&player.id))
-                .collect::<Vec<&mut Player>>();
+                .collect::<Vec<&mut Player<Active>>>();
             println!(
                 "Winners: {}",
                 winners

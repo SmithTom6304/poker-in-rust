@@ -1,4 +1,4 @@
-use crate::player::Player;
+use crate::player::{Active, Player};
 
 pub struct Pot {
     pub chips: u32,
@@ -9,7 +9,7 @@ impl Pot {
     /// Distributes pot winnings to a list of players.
     ///
     /// Players should be ordered by distance to dealer to account for splitting of uneven chip counts.
-    pub fn deal_winnings(&mut self, mut winners: Vec<&mut Player>) {
+    pub fn deal_winnings(&mut self, mut winners: Vec<&mut Player<Active>>) {
         let division = self.chips / winners.len() as u32;
         winners
             .iter_mut()
@@ -39,21 +39,17 @@ mod tests {
     use crate::{
         deck::Deck,
         hand::Hand,
-        player::{Player, PlayerId},
+        player::{Active, Player, PlayerId},
     };
 
     use super::Pot;
 
-    fn create_test_player(deck: &mut Deck, chips: u32) -> Player {
+    fn create_test_player(deck: &mut Deck, chips: u32) -> Player<Active> {
         let hand = Hand::new([
             deck.draw().expect("Deck was empty"),
             deck.draw().expect("Deck was empty"),
         ]);
-        Player {
-            id: PlayerId(0),
-            hand,
-            chips,
-        }
+        Player::<Active>::new(PlayerId(0), hand, chips)
     }
 
     #[test]

@@ -1,33 +1,41 @@
-use std::fmt::Display;
+use std::{fmt::Display, marker::PhantomData};
 
 use crate::{hand::Hand, pot::Pot};
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
-pub struct PlayerId(pub u8);
-impl Display for PlayerId {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-
 #[derive(Debug)]
-pub struct Player {
+pub struct Player<S: PlayerState> {
     pub id: PlayerId,
     pub hand: Hand,
     pub chips: u32,
+    marker: std::marker::PhantomData<S>,
 }
 
 #[derive(Debug)]
-pub struct FoldedPlayer {
-    pub id: PlayerId,
-    pub chips: u32,
-}
+pub enum Active {}
+#[derive(Debug)]
+pub enum Folded {}
 
-impl Player {
-    pub fn fold(self) -> FoldedPlayer {
-        FoldedPlayer {
-            chips: self.chips,
+pub trait PlayerState {}
+
+impl PlayerState for Active {}
+impl PlayerState for Folded {}
+
+impl Player<Active> {
+    pub fn new(id: PlayerId, hand: Hand, chips: u32) -> Self {
+        Player::<Active> {
+            id,
+            hand,
+            chips,
+            marker: PhantomData,
+        }
+    }
+
+    pub fn fold(self) -> Player<Folded> {
+        Player::<Folded> {
             id: self.id,
+            hand: self.hand,
+            chips: self.chips,
+            marker: PhantomData,
         }
     }
 
@@ -56,13 +64,22 @@ impl Player {
     }
 }
 
-impl FoldedPlayer {
-    pub fn deal_in(self, hand: Hand) -> Player {
-        Player {
+impl Player<Folded> {
+    pub fn deal_in(self, hand: Hand) -> Player<Active> {
+        Player::<Active> {
             id: self.id,
             chips: self.chips,
             hand,
+            marker: PhantomData,
         }
+    }
+}
+
+#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
+pub struct PlayerId(pub u8);
+impl Display for PlayerId {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
     }
 }
 
@@ -70,24 +87,20 @@ impl FoldedPlayer {
 mod tests {
     use crate::{card::Card, hand::Hand, pot::Pot, rank::Rank, suit::Suit};
 
-    use super::{Player, PlayerId};
+    use super::{Active, Player, PlayerId};
 
-    fn has_a_hand_and_chips(id: u8) -> Player {
+    fn create_test_player(id: u8) -> Player<Active> {
         let hand = Hand::new([
             Card::new(Suit::Spade, Rank::Ace),
             Card::new(Suit::Heart, Rank::Queen),
         ]);
         let chips = 100;
-        Player {
-            id: PlayerId(id),
-            hand,
-            chips,
-        }
+        Player::<Active>::new(PlayerId(id), hand, chips)
     }
 
     #[test]
     fn betting_reduces_chip_count() {
-        let mut player = has_a_hand_and_chips(0);
+        let mut player = create_test_player(0);
         let mut pot = Pot::empty();
         assert!(player.bet(20, &mut pot).is_ok());
         assert_eq!(80, player.chips);
@@ -96,14 +109,14 @@ mod tests {
 
     #[test]
     fn cannot_bet_more_chips_than_player_has() {
-        let mut player = has_a_hand_and_chips(0);
+        let mut player = create_test_player(0);
         let mut pot = Pot::empty();
         assert!(player.bet(300, &mut pot).is_err());
     }
 
     #[test]
     fn cannot_bet_less_than_minimum_pot_bet() {
-        let mut player = has_a_hand_and_chips(0);
+        let mut player = create_test_player(0);
         let mut pot = Pot {
             chips: 50,
             minimum_bet: 10,
@@ -113,7 +126,7 @@ mod tests {
 
     #[test]
     fn raising_increases_minimum_bet() {
-        let mut player = has_a_hand_and_chips(0);
+        let mut player = create_test_player(0);
         let mut pot = Pot {
             chips: 50,
             minimum_bet: 10,
