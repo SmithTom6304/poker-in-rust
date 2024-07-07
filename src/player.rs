@@ -2,7 +2,7 @@ use std::{fmt::Display, marker::PhantomData};
 
 use crate::{hand::Hand, pot::Pot};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Player<S: PlayerState> {
     pub id: PlayerId,
     pub hand: Hand,
@@ -10,9 +10,9 @@ pub struct Player<S: PlayerState> {
     marker: std::marker::PhantomData<S>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Active {}
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Folded {}
 
 pub trait PlayerState {}
@@ -65,6 +65,15 @@ impl Player<Active> {
 }
 
 impl Player<Folded> {
+    pub fn new(id: PlayerId, hand: Hand, chips: u32) -> Self {
+        Player::<Folded> {
+            id,
+            hand,
+            chips,
+            marker: PhantomData,
+        }
+    }
+
     pub fn deal_in(self, hand: Hand) -> Player<Active> {
         Player::<Active> {
             id: self.id,

@@ -1,7 +1,7 @@
-use super::game::Game;
+use super::state::game_loop::GameLoop;
 
 pub trait PlayerDriver {
-    fn determine_move(game: &Game) -> Move;
+    fn determine_move(game: &GameLoop) -> Move;
 }
 
 #[derive(Debug)]

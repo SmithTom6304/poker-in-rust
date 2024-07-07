@@ -6,6 +6,7 @@ use crate::card::Card;
 use crate::rank::Rank;
 use crate::suit::Suit;
 
+#[derive(Debug, Clone)]
 pub struct Deck {
     pub cards: Vec<Card>,
 }

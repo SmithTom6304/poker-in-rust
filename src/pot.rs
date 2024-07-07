@@ -1,5 +1,6 @@
 use crate::player::{Active, Player};
 
+#[derive(Debug, Clone, Copy)]
 pub struct Pot {
     pub chips: u32,
     pub minimum_bet: u32,

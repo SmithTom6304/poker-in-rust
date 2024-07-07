@@ -1,6 +1,6 @@
 use crate::card::Card;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Hand {
     pub cards: [Card; 2],
 }

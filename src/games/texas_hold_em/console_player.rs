@@ -1,14 +1,14 @@
 use std::io;
 
 use super::{
-    game::Game,
     player_driver::{Move, PlayerDriver},
+    state::game_loop::GameLoop,
 };
 
 pub struct ConsolePlayer {}
 
 impl PlayerDriver for ConsolePlayer {
-    fn determine_move(game: &Game) -> Move {
+    fn determine_move(game: &GameLoop) -> Move {
         println!("Press F to fold, C to call, R to raise by 10");
 
         let mut answer = String::new();
