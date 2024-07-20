@@ -31,6 +31,7 @@ impl PreFlop {
         ];
 
         self.deck = deck;
+        self.pot.minimum_bet = 10;
         let game_loop = self.create_game_loop();
         let stage_outcome = game_loop.do_stage();
 
