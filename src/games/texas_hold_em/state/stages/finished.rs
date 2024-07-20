@@ -18,7 +18,7 @@ pub struct Finished {
 
 impl Finished {
     pub fn payout(self) -> PreRound {
-        self.print_pre_round_info();
+        self.print_stage_info();
         let players = self
             .folded_players
             .into_iter()
@@ -34,7 +34,7 @@ impl Finished {
             .collect()
     }
 
-    fn print_pre_round_info(&self) {
+    fn print_stage_info(&self) {
         println!("{}", self);
         println!(
             "Players {} split a pot of {}",

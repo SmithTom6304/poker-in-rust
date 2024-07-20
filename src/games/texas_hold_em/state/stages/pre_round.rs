@@ -20,7 +20,7 @@ impl PreRound {
     }
 
     pub fn start_round(self) -> PreFlop {
-        self.print_pre_round_info();
+        self.print_stage_info();
         let mut deck = Deck::new().shuffle();
         let active_players = self
             .players
@@ -42,7 +42,7 @@ impl PreRound {
         player.deal_in(Hand::new(cards))
     }
 
-    fn print_pre_round_info(&self) {
+    fn print_stage_info(&self) {
         println!("{}", self);
         for player in self.players.iter() {
             println!("{}", player)

@@ -24,7 +24,7 @@ pub struct Flop {
 
 impl Flop {
     pub fn advance(mut self) -> Advancement<Turn> {
-        self.print_pre_round_info();
+        self.print_stage_info();
         let mut deck = self.deck;
         let cards = [
             self.cards[0],
@@ -69,7 +69,7 @@ impl Flop {
         }
     }
 
-    fn print_pre_round_info(&self) {
+    fn print_stage_info(&self) {
         println!("{}", self);
         for player in self.active_players.iter() {
             println!("{}", player)

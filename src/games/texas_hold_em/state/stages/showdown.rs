@@ -19,7 +19,7 @@ pub struct Showdown {
 
 impl Showdown {
     pub fn do_showdown(self) -> Finished {
-        self.print_pre_round_info();
+        self.print_stage_info();
         let active_players = self.active_players;
         let folded_players = self.folded_players;
         let pot = self.pot;
@@ -34,7 +34,7 @@ impl Showdown {
         }
     }
 
-    fn print_pre_round_info(&self) {
+    fn print_stage_info(&self) {
         println!("{}", self);
         for player in self.active_players.iter() {
             println!("{}", player)
