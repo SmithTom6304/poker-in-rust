@@ -2,7 +2,7 @@ use std::{fmt::Display, marker::PhantomData};
 
 use crate::{hand::Hand, pot::Pot};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Player<S: PlayerState> {
     pub id: PlayerId,
     pub hand: Hand,
@@ -64,6 +64,16 @@ impl Player<Active> {
     }
 }
 
+impl Display for Player<Active> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "Player {} - Hand: {} - Chips: {}",
+            self.id, self.hand, self.chips
+        )
+    }
+}
+
 impl Player<Folded> {
     pub fn new(id: PlayerId, hand: Hand, chips: u32) -> Self {
         Player::<Folded> {
@@ -81,6 +91,16 @@ impl Player<Folded> {
             hand,
             marker: PhantomData,
         }
+    }
+}
+
+impl Display for Player<Folded> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "Player {} - Hand: {} - Chips: {}",
+            self.id, self.hand, self.chips
+        )
     }
 }
 
@@ -110,7 +130,7 @@ mod tests {
     #[test]
     fn betting_reduces_chip_count() {
         let mut player = create_test_player(0);
-        let mut pot = Pot::empty();
+        let mut pot = Pot::default();
         assert!(player.bet(20, &mut pot).is_ok());
         assert_eq!(80, player.chips);
         assert_eq!(20, pot.chips);
@@ -119,7 +139,7 @@ mod tests {
     #[test]
     fn cannot_bet_more_chips_than_player_has() {
         let mut player = create_test_player(0);
-        let mut pot = Pot::empty();
+        let mut pot = Pot::default();
         assert!(player.bet(300, &mut pot).is_err());
     }
 

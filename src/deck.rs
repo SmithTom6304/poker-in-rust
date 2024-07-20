@@ -6,15 +6,9 @@ use crate::card::Card;
 use crate::rank::Rank;
 use crate::suit::Suit;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Deck {
     pub cards: Vec<Card>,
-}
-
-impl Default for Deck {
-    fn default() -> Self {
-        Self::new()
-    }
 }
 
 impl Deck {

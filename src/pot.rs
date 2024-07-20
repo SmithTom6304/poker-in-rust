@@ -1,6 +1,8 @@
+use std::fmt::Display;
+
 use crate::player::{Active, Player};
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Hash)]
 pub struct Pot {
     pub chips: u32,
     pub minimum_bet: u32,
@@ -26,11 +28,18 @@ impl Pot {
         self.minimum_bet = 0;
     }
 
-    pub fn empty() -> Self {
-        Pot {
-            chips: 0,
-            minimum_bet: 0,
-        }
+    pub fn new(chips: u32, minimum_bet: u32) -> Self {
+        Pot { chips, minimum_bet }
+    }
+}
+
+impl Display for Pot {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "Pot: {} chips, minimum bet {}",
+            self.chips, self.minimum_bet
+        )
     }
 }
 

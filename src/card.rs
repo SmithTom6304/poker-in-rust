@@ -2,7 +2,7 @@ use std::fmt;
 
 use crate::{rank::Rank, suit::Suit};
 
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
 pub struct Card {
     pub suit: Suit,
     pub rank: Rank,

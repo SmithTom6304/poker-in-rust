@@ -25,7 +25,7 @@ impl PreRound {
             .map(|player| PreRound::deal_player_in(player, &mut deck))
             .collect();
         let folded_players = vec![];
-        let pot = Pot::empty();
+        let pot = Pot::default();
         PreFlop {
             active_players,
             folded_players,
