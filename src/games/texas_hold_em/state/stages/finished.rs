@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use crate::{
     deck::Deck,
     player::{Active, Folded, Player},
@@ -16,6 +18,7 @@ pub struct Finished {
 
 impl Finished {
     pub fn payout(self) -> PreRound {
+        self.print_pre_round_info();
         let players = self
             .folded_players
             .into_iter()
@@ -29,5 +32,24 @@ impl Finished {
             .into_iter()
             .map(|player| player.fold())
             .collect()
+    }
+
+    fn print_pre_round_info(&self) {
+        println!("{}", self);
+        println!(
+            "Players {} split a pot of {}",
+            self.active_players
+                .iter()
+                .map(|player| player.id.to_string())
+                .reduce(|acc, id| format!("{acc}, {id}"))
+                .unwrap_or_default(),
+            self.pot.chips
+        )
+    }
+}
+
+impl Display for Finished {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Round finished")
     }
 }

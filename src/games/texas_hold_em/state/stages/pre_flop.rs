@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use crate::{
     deck::Deck,
     games::texas_hold_em::state::{
@@ -20,7 +22,7 @@ pub struct PreFlop {
 
 impl PreFlop {
     pub fn advance(mut self) -> Advancement<Flop> {
-        println!("PREFLOP");
+        self.print_pre_round_info();
         let mut deck = self.deck;
         let cards = [
             deck.draw().unwrap(),
@@ -62,5 +64,23 @@ impl PreFlop {
             current_player_index,
             pot,
         }
+    }
+
+    fn print_pre_round_info(&self) {
+        println!("{}", self);
+        for player in self.active_players.iter() {
+            println!("{}", player)
+        }
+    }
+}
+
+impl Display for PreFlop {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "Pre-Flop - Players: {} - Pot: {}",
+            self.active_players.len(),
+            self.pot.chips
+        )
     }
 }

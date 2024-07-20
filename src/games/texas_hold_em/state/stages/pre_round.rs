@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use crate::{
     deck::Deck,
     hand::Hand,
@@ -18,6 +20,7 @@ impl PreRound {
     }
 
     pub fn start_round(self) -> PreFlop {
+        self.print_pre_round_info();
         let mut deck = Deck::new().shuffle();
         let active_players = self
             .players
@@ -37,5 +40,18 @@ impl PreRound {
     fn deal_player_in(player: Player<Folded>, deck: &mut Deck) -> Player<Active> {
         let cards = [deck.draw().unwrap(), deck.draw().unwrap()];
         player.deal_in(Hand::new(cards))
+    }
+
+    fn print_pre_round_info(&self) {
+        println!("{}", self);
+        for player in self.players.iter() {
+            println!("{}", player)
+        }
+    }
+}
+
+impl Display for PreRound {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Pre-Round - Players: {}", self.players.len())
     }
 }

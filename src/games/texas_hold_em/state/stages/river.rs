@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use crate::{
     card::Card,
     deck::Deck,
@@ -22,7 +24,7 @@ pub struct River {
 
 impl River {
     pub fn advance(mut self) -> Advancement<Showdown> {
-        println!("RIVER");
+        self.print_pre_round_info();
         let deck = self.deck;
         let cards = self.cards;
 
@@ -60,5 +62,28 @@ impl River {
             current_player_index,
             pot,
         }
+    }
+
+    fn print_pre_round_info(&self) {
+        println!("{}", self);
+        for player in self.active_players.iter() {
+            println!("{}", player)
+        }
+    }
+}
+
+impl Display for River {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "River - Players: {} - Pot: {} - Cards: {} {} {} {} {}",
+            self.active_players.len(),
+            self.pot.chips,
+            self.cards[0],
+            self.cards[1],
+            self.cards[2],
+            self.cards[3],
+            self.cards[4]
+        )
     }
 }

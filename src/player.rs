@@ -96,11 +96,7 @@ impl Player<Folded> {
 
 impl Display for Player<Folded> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "Player {} - Hand: {} - Chips: {}",
-            self.id, self.hand, self.chips
-        )
+        write!(f, "Player {} - Chips: {}", self.id, self.chips)
     }
 }
 
