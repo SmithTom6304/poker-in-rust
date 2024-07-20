@@ -37,6 +37,8 @@ impl GameLoop {
             move_outcome = self.do_move(player_move);
         }
 
+        self.pot.minimum_bet = 0;
+
         match move_outcome {
             MoveOutcome::StageFinished => StageOutcome::NextStage(self),
             MoveOutcome::RoundFinished => StageOutcome::Finished(self),
