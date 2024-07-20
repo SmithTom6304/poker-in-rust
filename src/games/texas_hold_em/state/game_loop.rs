@@ -127,8 +127,7 @@ impl GameLoop {
                 self.current_player_index =
                     (self.current_player_index + 1) % self.active_players.len()
             }
-            Move::Raise { amount } => {
-                self.handle_raise(amount);
+            Move::Raise { amount: _ } => {
                 self.button_index = match self.current_player_index {
                     0 => self.active_players.len() - 1,
                     _ => self.current_player_index - 1,
