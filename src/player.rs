@@ -1,4 +1,4 @@
-use std::{fmt::Display, marker::PhantomData};
+use std::fmt::Display;
 
 use crate::{hand::Hand, pot::Pot};
 
@@ -7,13 +7,15 @@ pub struct Player<S: PlayerState> {
     pub id: PlayerId,
     pub hand: Hand,
     pub chips: u32,
-    marker: std::marker::PhantomData<S>,
+    pub state: S,
 }
 
-#[derive(Debug, Clone)]
-pub enum Active {}
-#[derive(Debug, Clone)]
-pub enum Folded {}
+#[derive(Debug, Clone, Copy, Default)]
+pub struct Active {
+    pub chips_bet_in_stage: u32,
+}
+#[derive(Debug, Clone, Copy, Default)]
+pub struct Folded {}
 
 pub trait PlayerState {}
 
@@ -26,7 +28,7 @@ impl Player<Active> {
             id,
             hand,
             chips,
-            marker: PhantomData,
+            state: Active::default(),
         }
     }
 
@@ -35,12 +37,12 @@ impl Player<Active> {
             id: self.id,
             hand: self.hand,
             chips: self.chips,
-            marker: PhantomData,
+            state: Folded::default(),
         }
     }
 
     pub fn bet(&mut self, amount: u32, pot: &mut Pot) -> Result<(), String> {
-        if amount < pot.minimum_bet {
+        if amount < (pot.minimum_bet - self.state.chips_bet_in_stage) {
             return Err(format!(
                 "Bet amount ({}) is less than minimum bet ({})",
                 amount, pot.minimum_bet
@@ -59,6 +61,7 @@ impl Player<Active> {
         }
 
         self.chips -= amount;
+        self.state.chips_bet_in_stage += amount;
         pot.chips += amount;
         Ok(())
     }
@@ -80,7 +83,7 @@ impl Player<Folded> {
             id,
             hand,
             chips,
-            marker: PhantomData,
+            state: Folded::default(),
         }
     }
 
@@ -89,7 +92,7 @@ impl Player<Folded> {
             id: self.id,
             chips: self.chips,
             hand,
-            marker: PhantomData,
+            state: Active::default(),
         }
     }
 }

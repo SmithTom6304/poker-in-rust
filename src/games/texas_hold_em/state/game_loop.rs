@@ -38,6 +38,9 @@ impl GameLoop {
         }
 
         self.pot.minimum_bet = 0;
+        for player in self.active_players.iter_mut() {
+            player.state.chips_bet_in_stage = 0;
+        }
 
         match move_outcome {
             MoveOutcome::StageFinished => StageOutcome::NextStage(self),
@@ -91,7 +94,8 @@ impl GameLoop {
 
     fn handle_call(&mut self) {
         let current_player = &mut self.active_players[self.current_player_index];
-        match current_player.bet(self.pot.minimum_bet, &mut self.pot) {
+        let amount_to_bet = self.pot.minimum_bet - current_player.state.chips_bet_in_stage;
+        match current_player.bet(amount_to_bet, &mut self.pot) {
             Ok(_) => (),
             Err(err) => {
                 println!("Error performing player call: {}. Folding instead", err);
