@@ -24,7 +24,7 @@ fn main() {
         deal_player(PlayerId(2), &mut deck),
         deal_player(PlayerId(3), &mut deck),
     ];
-    let stage = PreRound::new(players);
+    let stage = PreRound::new(players).unwrap();
     let stage = stage.start_round();
 
     let stage = match stage.advance() {

@@ -15,8 +15,11 @@ pub struct PreRound {
 }
 
 impl PreRound {
-    pub fn new(players: Vec<Player<Folded>>) -> Self {
-        Self { players }
+    pub fn new(players: Vec<Player<Folded>>) -> Result<Self, String> {
+        if players.len() < 2 {
+            return Err("Game requires at least two players".to_string());
+        }
+        Ok(Self { players })
     }
 
     pub fn start_round(self) -> PreFlop {
