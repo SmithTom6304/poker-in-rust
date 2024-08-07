@@ -1,14 +1,12 @@
 use std::fmt::Display;
 
 use crate::{
-    card::Card,
-    deck::Deck,
     games::texas_hold_em::state::{
         advancement::Advancement,
         game_loop::{GameLoop, StageOutcome},
     },
     player::{Active, Folded, Player},
-    pot::Pot,
+    Card, Deck, Pot,
 };
 
 use super::{finished::Finished, turn::Turn};

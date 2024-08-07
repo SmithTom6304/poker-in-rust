@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use crate::card::Card;
+use crate::Card;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Hand {

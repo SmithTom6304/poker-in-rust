@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use crate::{card::Card, deck::Deck};
+use crate::{Card, Deck};
 
 use super::{
     database::DataBase,
@@ -89,7 +89,7 @@ impl TryFrom<HandVal> for HandRank {
 mod tests {
     use std::path::PathBuf;
 
-    use crate::{rank::Rank, suit::Suit};
+    use crate::{Rank, Suit};
 
     use super::*;
     use rstest::rstest;

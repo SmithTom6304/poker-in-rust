@@ -1,10 +1,8 @@
 use std::fmt::Display;
 
 use crate::{
-    deck::Deck,
-    hand::Hand,
     player::{Active, Folded, Player},
-    pot::Pot,
+    Deck, Hand, Pot,
 };
 
 use super::pre_flop::PreFlop;

@@ -1,6 +1,6 @@
 use std::fmt;
 
-use crate::{rank::Rank, suit::Suit};
+use crate::{Rank, Suit};
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
 pub struct Card {
@@ -34,7 +34,7 @@ impl fmt::Display for Card {
 
 #[cfg(test)]
 mod tests {
-    use crate::{rank::Rank, suit::Suit};
+    use crate::{Rank, Suit};
 
     use super::Card;
     use rstest::rstest;

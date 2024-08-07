@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use crate::{hand::Hand, pot::Pot};
+use crate::{Hand, Pot};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Player<S: PlayerState> {
@@ -113,7 +113,7 @@ impl Display for PlayerId {
 
 #[cfg(test)]
 mod tests {
-    use crate::{card::Card, hand::Hand, pot::Pot, rank::Rank, suit::Suit};
+    use crate::{Card, Hand, Pot, Rank, Suit};
 
     use super::{Active, Player, PlayerId};
 

@@ -1,10 +1,8 @@
 use std::fmt::Display;
 
 use crate::{
-    card::Card,
-    deck::Deck,
     player::{Active, Folded, Player},
-    pot::Pot,
+    Card, Deck, Pot,
 };
 
 use super::finished::Finished;

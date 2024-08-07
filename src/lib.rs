@@ -1,8 +1,10 @@
-pub mod card;
-pub mod deck;
 pub mod games;
-pub mod hand;
-pub mod player;
-pub mod pot;
-pub mod rank;
-pub mod suit;
+pub mod poker;
+
+pub use poker::card::Card;
+pub use poker::deck::Deck;
+pub use poker::hand::Hand;
+pub use poker::player;
+pub use poker::pot::Pot;
+pub use poker::rank::Rank;
+pub use poker::suit::Suit;

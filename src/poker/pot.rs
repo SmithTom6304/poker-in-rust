@@ -47,9 +47,8 @@ impl Display for Pot {
 mod tests {
 
     use crate::{
-        deck::Deck,
-        hand::Hand,
         player::{Active, Player, PlayerId},
+        Deck, Hand,
     };
 
     use super::Pot;

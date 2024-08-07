@@ -4,7 +4,7 @@ use crate::{
         player_driver::{Move, PlayerDriver},
     },
     player::{Active, Folded, Player},
-    pot::Pot,
+    Pot,
 };
 
 #[derive(Debug)]

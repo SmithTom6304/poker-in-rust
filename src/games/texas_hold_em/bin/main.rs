@@ -1,11 +1,10 @@
 use poker_in_rust::{
-    deck::Deck,
     games::texas_hold_em::state::{
         advancement::Advancement,
         stages::{finished::Finished, pre_round::PreRound},
     },
-    hand::Hand,
     player::{Folded, Player, PlayerId},
+    Deck, Hand,
 };
 
 fn main() {

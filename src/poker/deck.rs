@@ -2,9 +2,7 @@ use rand::seq::SliceRandom;
 use rand::thread_rng;
 use strum::IntoEnumIterator;
 
-use crate::card::Card;
-use crate::rank::Rank;
-use crate::suit::Suit;
+use crate::{Card, Rank, Suit};
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Deck {

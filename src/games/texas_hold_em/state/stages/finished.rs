@@ -1,9 +1,8 @@
 use std::fmt::Display;
 
 use crate::{
-    deck::Deck,
     player::{Active, Folded, Player},
-    pot::Pot,
+    Deck, Pot,
 };
 
 use super::pre_round::PreRound;
