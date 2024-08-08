@@ -1,9 +1,9 @@
 use crate::{
-    games::texas_hold_em::{
+    player::{Active, Folded, Player},
+    texas_hold_em::{
         console_player::ConsolePlayer,
         player_driver::{Move, PlayerDriver},
     },
-    player::{Active, Folded, Player},
     Pot,
 };
 

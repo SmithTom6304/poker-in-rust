@@ -1,9 +1,9 @@
 use poker_in_rust::{
-    games::texas_hold_em::state::{
+    player::{Folded, Player, PlayerId},
+    texas_hold_em::state::{
         advancement::Advancement,
         stages::{finished::Finished, pre_round::PreRound},
     },
-    player::{Folded, Player, PlayerId},
     Deck, Hand,
 };
 

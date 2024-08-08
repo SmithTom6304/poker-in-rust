@@ -5,7 +5,7 @@ edition = "2021"
 
 [[bin]]
 name = "texas_hold_em"
-path = "src/games/texas_hold_em/bin/main.rs"
+path = "src/texas_hold_em/bin/main.rs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

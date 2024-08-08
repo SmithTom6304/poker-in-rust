@@ -1,10 +1,10 @@
 use std::fmt::Display;
 
+use super::super::{
+    advancement::Advancement,
+    game_loop::{GameLoop, StageOutcome},
+};
 use crate::{
-    games::texas_hold_em::state::{
-        advancement::Advancement,
-        game_loop::{GameLoop, StageOutcome},
-    },
     player::{Active, Folded, Player},
     Deck, Pot,
 };

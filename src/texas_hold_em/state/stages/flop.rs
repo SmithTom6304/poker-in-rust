@@ -1,37 +1,42 @@
 use std::fmt::Display;
 
+use super::super::{
+    advancement::Advancement,
+    game_loop::{GameLoop, StageOutcome},
+};
 use crate::{
-    games::texas_hold_em::state::{
-        advancement::Advancement,
-        game_loop::{GameLoop, StageOutcome},
-    },
     player::{Active, Folded, Player},
     Card, Deck, Pot,
 };
 
-use super::{finished::Finished, showdown::Showdown};
+use super::{finished::Finished, turn::Turn};
 
 #[derive(Debug)]
-pub struct River {
+pub struct Flop {
     pub active_players: Vec<Player<Active>>,
     pub folded_players: Vec<Player<Folded>>,
     pub pot: Pot,
     pub deck: Deck,
-    pub cards: [Card; 5],
+    pub cards: [Card; 3],
 }
 
-impl River {
-    pub fn advance(mut self) -> Advancement<Showdown> {
+impl Flop {
+    pub fn advance(mut self) -> Advancement<Turn> {
         self.print_stage_info();
-        let deck = self.deck;
-        let cards = self.cards;
+        let mut deck = self.deck;
+        let cards = [
+            self.cards[0],
+            self.cards[1],
+            self.cards[2],
+            deck.draw().unwrap(),
+        ];
 
         self.deck = deck;
         let game_loop = self.create_game_loop();
         let stage_outcome = game_loop.do_stage();
 
         match stage_outcome {
-            StageOutcome::NextStage(game_loop) => Advancement::NextStage(Showdown {
+            StageOutcome::NextStage(game_loop) => Advancement::NextStage(Turn {
                 active_players: game_loop.active_players,
                 folded_players: game_loop.folded_players,
                 pot: game_loop.pot,
@@ -70,18 +75,16 @@ impl River {
     }
 }
 
-impl Display for River {
+impl Display for Flop {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "River - Players: {} - Pot: {} - Cards: {} {} {} {} {}",
+            "Flop - Players: {} - Pot: {} - Cards: {} {} {}",
             self.active_players.len(),
             self.pot.chips,
             self.cards[0],
             self.cards[1],
-            self.cards[2],
-            self.cards[3],
-            self.cards[4]
+            self.cards[2]
         )
     }
 }

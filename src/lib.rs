@@ -1,5 +1,5 @@
-pub mod games;
 pub mod poker;
+pub mod texas_hold_em;
 
 pub use poker::card::Card;
 pub use poker::deck::Deck;

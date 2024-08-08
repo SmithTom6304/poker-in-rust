@@ -1,33 +1,34 @@
 use std::fmt::Display;
 
+use super::super::{
+    advancement::Advancement,
+    game_loop::{GameLoop, StageOutcome},
+};
 use crate::{
-    games::texas_hold_em::state::{
-        advancement::Advancement,
-        game_loop::{GameLoop, StageOutcome},
-    },
     player::{Active, Folded, Player},
     Card, Deck, Pot,
 };
 
-use super::{finished::Finished, turn::Turn};
+use super::{finished::Finished, river::River};
 
 #[derive(Debug)]
-pub struct Flop {
+pub struct Turn {
     pub active_players: Vec<Player<Active>>,
     pub folded_players: Vec<Player<Folded>>,
     pub pot: Pot,
     pub deck: Deck,
-    pub cards: [Card; 3],
+    pub cards: [Card; 4],
 }
 
-impl Flop {
-    pub fn advance(mut self) -> Advancement<Turn> {
+impl Turn {
+    pub fn advance(mut self) -> Advancement<River> {
         self.print_stage_info();
         let mut deck = self.deck;
         let cards = [
             self.cards[0],
             self.cards[1],
             self.cards[2],
+            self.cards[3],
             deck.draw().unwrap(),
         ];
 
@@ -36,7 +37,7 @@ impl Flop {
         let stage_outcome = game_loop.do_stage();
 
         match stage_outcome {
-            StageOutcome::NextStage(game_loop) => Advancement::NextStage(Turn {
+            StageOutcome::NextStage(game_loop) => Advancement::NextStage(River {
                 active_players: game_loop.active_players,
                 folded_players: game_loop.folded_players,
                 pot: game_loop.pot,
@@ -75,16 +76,17 @@ impl Flop {
     }
 }
 
-impl Display for Flop {
+impl Display for Turn {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "Flop - Players: {} - Pot: {} - Cards: {} {} {}",
+            "Turn - Players: {} - Pot: {} - Cards: {} {} {} {}",
             self.active_players.len(),
             self.pot.chips,
             self.cards[0],
             self.cards[1],
-            self.cards[2]
+            self.cards[2],
+            self.cards[3]
         )
     }
 }
