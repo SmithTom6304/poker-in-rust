@@ -10,7 +10,7 @@ pub struct Player<S: PlayerState> {
     pub state: S,
 }
 
-#[derive(Debug, Clone, Copy, Default)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Active {
     pub chips_bet_in_stage: u32,
 }

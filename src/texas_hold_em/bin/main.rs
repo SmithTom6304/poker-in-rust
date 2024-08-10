@@ -1,17 +1,22 @@
+use std::env;
+
 use poker_in_rust::{
     player::{Folded, Player, PlayerId},
-    texas_hold_em::state::{
-        advancement::Advancement,
-        stages::{finished::Finished, pre_round::PreRound},
+    texas_hold_em::{
+        evaluation::two_plus_two_evaluator::TwoPlusTwoEvaluator,
+        state::{
+            advancement::Advancement,
+            stages::{finished::Finished, pre_round::PreRound},
+        },
     },
     Deck, Hand,
 };
 
 fn main() {
-    // let exe_path = env::current_exe().expect("Could not find current exe");
-    // let path = exe_path.parent().unwrap().join("HandRanks.dat");
-    // let evaluator =
-    //     TwoPlusTwoEvaluator::create_from_path(&path).expect("Could not parse hand ranks db");
+    let exe_path = env::current_exe().expect("Could not find current exe");
+    let path = exe_path.parent().unwrap().join("HandRanks.dat");
+    let evaluator =
+        TwoPlusTwoEvaluator::create_from_path(&path).expect("Could not parse hand ranks db");
 
     // let game = Game::new(3, Box::new(evaluator));
     // game.do_round()
@@ -58,13 +63,12 @@ fn main() {
         }
     };
 
-    let finished = stage.do_showdown();
+    let finished = stage.finish(Box::new(evaluator));
     finish_game(finished);
 }
 
-fn finish_game(finished: Finished) -> Finished {
-    println!("{:?}", finished);
-    finished
+fn finish_game(finished: Finished) -> PreRound {
+    finished.payout()
 }
 
 fn deal_player(id: PlayerId, deck: &mut Deck) -> Player<Folded> {
