@@ -18,12 +18,19 @@ pub struct Finished {
 impl Finished {
     pub fn payout(self) -> PreRound {
         self.print_stage_info();
+        let mut winners = self.active_players.clone();
+        let mut pot = self.pot;
+        pot.deal_winnings(winners.iter_mut().collect());
         let players = self
             .folded_players
             .into_iter()
-            .chain(Finished::fold_active_players(self.active_players).into_iter())
+            .chain(Finished::fold_active_players(winners).into_iter())
             .collect();
-        PreRound { players }
+        PreRound {
+            players,
+            pot,
+            deck: self.deck,
+        }
     }
 
     fn fold_active_players(active_players: Vec<Player<Active>>) -> Vec<Player<Folded>> {

@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 use crate::{
-    player::{Active, Folded, Player},
+    player::{Active, Folded, Player, PlayerId},
     Deck, Hand, Pot,
 };
 
@@ -10,14 +10,31 @@ use super::pre_flop::PreFlop;
 #[derive(Debug)]
 pub struct PreRound {
     pub players: Vec<Player<Folded>>,
+    pub pot: Pot,
+    pub deck: Deck,
 }
 
 impl PreRound {
-    pub fn new(players: Vec<Player<Folded>>) -> Result<Self, String> {
-        if players.len() < 2 {
+    pub fn new(players: u8) -> Result<Self, String> {
+        if players < 2 {
             return Err("Game requires at least two players".to_string());
         }
-        Ok(Self { players })
+
+        let pot = Pot::default();
+        let mut deck = Deck::new().shuffle();
+
+        let mut folded_players = vec![];
+        let mut i = 0;
+        while i < players {
+            i += 1;
+            folded_players.push(Self::deal_player(PlayerId(i), &mut deck))
+        }
+
+        Ok(Self {
+            players: folded_players,
+            pot,
+            deck,
+        })
     }
 
     pub fn start_round(self) -> PreFlop {
@@ -48,6 +65,11 @@ impl PreRound {
         for player in self.players.iter() {
             println!("{}", player)
         }
+    }
+
+    fn deal_player(id: PlayerId, deck: &mut Deck) -> Player<Folded> {
+        let cards = [deck.draw().unwrap(), deck.draw().unwrap()];
+        Player::<Folded>::new(id, Hand::new(cards), 100)
     }
 }
 

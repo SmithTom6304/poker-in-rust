@@ -23,7 +23,7 @@ pub struct PlayerRankPair<'player> {
 }
 
 impl Showdown {
-    pub fn finish(mut self, evaluator: Box<dyn Evaluator>) -> Finished {
+    pub fn finish(mut self, evaluator: &Box<dyn Evaluator>) -> Finished {
         self.print_stage_info();
 
         self.fold_losers(evaluator);
@@ -41,14 +41,14 @@ impl Showdown {
         }
     }
 
-    pub fn determine_player_ranks(&self, evaluator: Box<dyn Evaluator>) -> Vec<PlayerRankPair> {
+    pub fn determine_player_ranks(&self, evaluator: &Box<dyn Evaluator>) -> Vec<PlayerRankPair> {
         self.active_players
             .iter()
             .map(|player| Showdown::determine_player_rank(self.cards, player, &evaluator))
             .collect::<Vec<PlayerRankPair>>()
     }
 
-    fn fold_losers(&mut self, evaluator: Box<dyn Evaluator>) {
+    fn fold_losers(&mut self, evaluator: &Box<dyn Evaluator>) {
         let player_ranks = self.determine_player_ranks(evaluator);
         let high_score = player_ranks.iter().map(|p| p.rank).max().unwrap();
 
