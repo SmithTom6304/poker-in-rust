@@ -9,14 +9,20 @@ fn main() -> Result<()> {
     let handranks_data = PathBuf::from("two-plus-two-hand-evaluator/HandRanks.dat");
 
     if !handranks_data.exists() {
-        Command::new("make")
+        let make_command = Command::new("make")
             .current_dir(
                 handranks_data
                     .parent()
                     .expect("Could not find handranks data parent directory"),
             )
-            .output()
-            .expect("Failed to generate");
+            .output();
+        if let Err(make_error) = make_command {
+            if let std::io::ErrorKind::NotFound = make_error.kind() { 
+                return Err(anyhow!("make not found. Check your path, or install make."));
+            } else {
+                return Err(anyhow!("Unexpected error occured making HandRanks.Dat: {}", make_error));
+            }
+        }
     }
 
     let out_dir = get_output_path();
